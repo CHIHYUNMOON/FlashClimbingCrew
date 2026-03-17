@@ -7,17 +7,15 @@ function App() {
   const [session, setSession] = useState(null);
   const [user, setUser] = useState(null);
   const [nickname, setNickname] = useState("");
-
   const [date, setDate] = useState(today);
   const [message, setMessage] = useState("");
-  const [records, setRecords] = useState([]);
   const [monthlyRanking, setMonthlyRanking] = useState([]);
 
   const signInWithKakao = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "kakao",
       options: {
-        redirectTo: "https://flash-climbing-crew.vercel.app/",
+        redirectTo: window.location.origin,
       },
     });
 
@@ -34,7 +32,7 @@ function App() {
       return;
     }
 
-    setMessage("로그아웃되었습니다.");
+    setMessage("");
   };
 
   const makeMonthlyRanking = (data) => {
@@ -50,12 +48,14 @@ function App() {
       counts[displayName] += 1;
     });
 
-    const rankingArray = Object.entries(counts).map(([name, count]) => ({
-      name,
-      count,
-    }));
+    const rankingArray = Object.entries(counts)
+      .map(([name, count]) => ({
+        name,
+        count,
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 15);
 
-    rankingArray.sort((a, b) => b.count - a.count);
     setMonthlyRanking(rankingArray);
   };
 
@@ -74,15 +74,13 @@ function App() {
       .from("attendance")
       .select("*")
       .gte("attendance_date", firstDay)
-      .lte("attendance_date", lastDay)
-      .order("attendance_date", { ascending: false });
+      .lte("attendance_date", lastDay);
 
     if (error) {
-      setMessage("출석 기록 조회 실패: " + error.message);
+      setMessage("출석 랭킹 조회 실패: " + error.message);
       return;
     }
 
-    setRecords(data || []);
     makeMonthlyRanking(data || []);
   };
 
@@ -163,30 +161,52 @@ function App() {
         "";
 
       setNickname(displayName);
+      fetchAttendance();
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  return (
-    <div style={{ padding: "40px", fontFamily: "sans-serif" }}>
-      <h1>크루 출석 체크</h1>
-
-      {!session ? (
-        <button onClick={signInWithKakao}>카카오로 로그인</button>
-      ) : (
-        <div style={{ marginBottom: "20px" }}>
-          <p>
-            로그인됨: <strong>{nickname || "사용자"}</strong>
-          </p>
-          <button onClick={signOut}>로그아웃</button>
-        </div>
-      )}
-
-      <div style={{ marginBottom: "12px" }}>
-        <label>이름: </label>
-        <input value={nickname} disabled />
+  if (!session) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          fontFamily: "sans-serif",
+        }}
+      >
+        <button
+          onClick={signInWithKakao}
+          style={{
+            padding: "16px 28px",
+            fontSize: "18px",
+            border: "none",
+            borderRadius: "12px",
+            cursor: "pointer",
+          }}
+        >
+          카카오로 로그인
+        </button>
       </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        maxWidth: "720px",
+        margin: "0 auto",
+        padding: "40px 20px",
+        fontFamily: "sans-serif",
+      }}
+    >
+      <h1 style={{ marginBottom: "8px" }}>크루 출석 체크</h1>
+      <p style={{ marginBottom: "20px" }}>
+        로그인됨: <strong>{nickname || "사용자"}</strong>
+      </p>
 
       <div style={{ marginBottom: "12px" }}>
         <label>날짜: </label>
@@ -197,34 +217,33 @@ function App() {
         />
       </div>
 
-      <button onClick={handleAttendance} disabled={!session}>
-        출석 체크
-      </button>
+      <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
+        <button onClick={handleAttendance}>출석 체크</button>
+        <button onClick={signOut}>로그아웃</button>
+      </div>
 
-      <p style={{ marginTop: "16px" }}>{message}</p>
+      <p style={{ minHeight: "24px" }}>{message}</p>
 
       <hr style={{ margin: "30px 0" }} />
 
-      <h2>이번 달 참여 랭킹</h2>
+      <h2>이번 달 출석 랭킹</h2>
       {monthlyRanking.length === 0 ? (
         <p>이번 달 출석 데이터가 없습니다.</p>
       ) : (
         monthlyRanking.map((person, index) => (
-          <div key={person.name} style={{ marginBottom: "8px" }}>
-            {index + 1}위 - {person.name} ({person.count}회)
-          </div>
-        ))
-      )}
-
-      <hr style={{ margin: "30px 0" }} />
-
-      <h2>이번 달 출석 기록</h2>
-      {records.length === 0 ? (
-        <p>이번 달 저장된 출석 기록이 없습니다.</p>
-      ) : (
-        records.map((record) => (
-          <div key={record.id} style={{ marginBottom: "8px" }}>
-            {record.nickname} / {record.attendance_date}
+          <div
+            key={person.name}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "10px 0",
+              borderBottom: "1px solid #eee",
+            }}
+          >
+            <span>
+              {index + 1}위 · {person.name}
+            </span>
+            <strong>{person.count}회</strong>
           </div>
         ))
       )}
