@@ -168,30 +168,34 @@ function App() {
   }, []);
 
   if (!session) {
-    return (
-      <div
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        fontFamily: "sans-serif",
+        gap: "20px",
+      }}
+    >
+      <h1>Flash Climbing Crew 출석 체크</h1>
+
+      <button
+        onClick={signInWithKakao}
         style={{
-          minHeight: "100vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontFamily: "sans-serif",
+          padding: "16px 28px",
+          fontSize: "18px",
+          border: "none",
+          borderRadius: "12px",
+          cursor: "pointer",
         }}
       >
-        <button
-          onClick={signInWithKakao}
-          style={{
-            padding: "16px 28px",
-            fontSize: "18px",
-            border: "none",
-            borderRadius: "12px",
-            cursor: "pointer",
-          }}
-        >
-          카카오로 로그인
-        </button>
-      </div>
-    );
+        카카오로 로그인
+      </button>
+    </div>
+  );
   }
 
   return (
@@ -203,7 +207,7 @@ function App() {
         fontFamily: "sans-serif",
       }}
     >
-      <h1 style={{ marginBottom: "8px" }}>크루 출석 체크</h1>
+      <h1 style={{ marginBottom: "8px" }}>Flash Climbing Crew 출석 체크</h1>
       <p style={{ marginBottom: "20px" }}>
         로그인됨: <strong>{nickname || "사용자"}</strong>
       </p>
