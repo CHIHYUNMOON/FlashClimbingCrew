@@ -17,7 +17,7 @@ function App() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "kakao",
       options: {
-        redirectTo: "http://localhost:5173",
+        redirectTo: "https://flash-climbing-crew.vercel.app/",
       },
     });
 
