@@ -180,7 +180,7 @@ function App() {
         gap: "20px",
       }}
     >
-      <h1>Flash Climbing Crew 출석 체크</h1>
+      <h1>🧗 WeFlash</h1>
 
       <button
         onClick={signInWithKakao}
@@ -207,7 +207,7 @@ function App() {
         fontFamily: "sans-serif",
       }}
     >
-      <h1 style={{ marginBottom: "8px" }}>Flash Climbing Crew 출석 체크</h1>
+      <h1 style={{ marginBottom: "8px" }}>🧗 WeFlash</h1>
       <p style={{ marginBottom: "20px" }}>
         로그인됨: <strong>{nickname || "사용자"}</strong>
       </p>
